@@ -50,11 +50,11 @@ long run(int vertices, long *stats) {
 int worker(void *arg) {
     orderFmt *orders = (orderFmt *) arg;
 
-    printf("|START|\n");
+    // printf("|START|\n");
     memset(orders->stats, 0, sizeof(orders->stats));
     int vertices = orders->vertices;
     orders->result = run(vertices, orders->stats);
-    printf("<TERM>\n");
+    // printf("<TERM>\n");
     return 0;
 }
 
