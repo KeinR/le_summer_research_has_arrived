@@ -1,10 +1,11 @@
 import numpy as np
 from collections import Counter
+import copy
 
 # Tree, from vertex, current vertex, count map,
 # current recorded distance (including this one)
 def walk(t, f, r, c, d):
-    print("Checking f=%i,r=%i,d=%i" % (f,r,d))
+    # print("Checking f=%i,r=%i,d=%i" % (f,r,d))
     if c[r] > 1:
         vertices = set()
         for i in range(0, int(len(t) / 2)):
@@ -21,9 +22,7 @@ def walk(t, f, r, c, d):
         return [d]
     else:
         # Impossible!!!
-        return -420
-
-
+        assert(False)
 
 def treeCodeList(a):
     c = Counter(a)
@@ -42,6 +41,7 @@ def treeCodeList(a):
 def treeCode(a):
     l = treeCodeList(a)
     c = Counter(l)
+    # https://oeis.org/A000040
     primes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,
              61,67,71,73,79,83,89,97,101,103,107,109,113,127,
              131,137,139,149,151,157,163,167,173,179,181,191,
@@ -67,7 +67,7 @@ def checkIsometric(a, b):
 
     ca = treeCode(a)
     cb = treeCode(b)
-    print(ca)
+    # print(ca)
     return ca == cb
 
 def isConnected(g):
@@ -105,11 +105,58 @@ def isConnected(g):
             return False
     return True
 
+def isTree(graph):
+    return isConnected(graph) and len(set(graph)) - 1 == int(len(graph) / 2)
+
+
+# print(checkIsometric([0, 1, 1, 2, 2, 3, 1, 7], [4, 3, 3, 6, 6, 1, 3, 9]))
+
+# print(isTree([0, 1, 1, 2, 2, 3, 1, 7]))
+
+def testV(v):
+    length = (v - 1) * 2
+    series = []
+    nonIso = []
+    for i in range(length):
+        series.append(0)
+    running = True
+    while running:
+        if isTree(series):
+            if len(nonIso) == 0:
+                print("Appending: " + str(series))
+                nonIso.append(copy.deepcopy(series))
+            else:
+                good = True
+                for n in nonIso:
+                    if checkIsometric(n, series):
+                        good = False
+                        break
+                if good:
+                    print("Appending: " + str(series))
+                    nonIso.append(copy.deepcopy(series))
+        series[0] += 1
+        for i in range(len(series)):
+            if series[i] >= v:
+                if i+1 < len(series):
+                    series[i] = 0
+                    series[i+1] += 1
+                else:
+                    running = False
+                    break
+            else:
+                break
+    return nonIso
+
+
+print(testV(6))
+
+# print(isTree([0, 0, 0, 0, 0, 4]))
+
+# print(isTree([1, 0, 1, 3, 2, 1]))
+# print(isTree([2, 3, 0, 2, 2, 1]))
+
+# print(checkIsometric([2, 3, 0, 2, 2, 1], [1, 0, 1, 3, 2, 1]))
 
 
 
-
-print(checkIsometric([0, 1, 1, 2, 2, 3, 1, 7], [4, 3, 3, 6, 6, 1, 3, 9]))
-
-print(isConnected([0, 1, 2, 3, 1, 7]))
 
