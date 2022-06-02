@@ -70,7 +70,47 @@ def checkIsometric(a, b):
     print(ca)
     return ca == cb
 
+def isConnected(g):
+    identity = {}
+    c = Counter(g)
+    for k in c:
+        identity[k] = -1
+    gi = 0
+    for i in range(0, int(len(g) / 2)):
+        m = i * 2
+        f = g[m]
+        s = g[m+1]
+        fi = identity[f]
+        si = identity[s]
+        if fi == -1 and si == -1:
+            identity[f] = gi
+            identity[s] = gi
+            gi += 1
+        elif fi != si:
+            if si == -1:
+                identity[s] = identity[f]
+            elif fi == -1:
+                identity[f] = identity[s]
+            else:
+                target = identity[s]
+                goal = identity[f]
+                for k,v in identity.items():
+                    if v == target:
+                        identity[k] = goal
+    c = -1
+    for k,v in identity.items():
+        if c == -1:
+            c = v
+        elif c != v:
+            return False
+    return True
+
+
+
+
+
 
 print(checkIsometric([0, 1, 1, 2, 2, 3, 1, 7], [4, 3, 3, 6, 6, 1, 3, 9]))
 
+print(isConnected([0, 1, 2, 3, 1, 7]))
 
