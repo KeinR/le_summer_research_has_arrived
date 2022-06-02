@@ -7,6 +7,8 @@ What is the matrix, you ask???
 
 It is the adjacency matrix!
 
+It doesn't care about what kinds of laebels you use, or even if you use them sequentualy...
+
 Simply input your (flattened) graph and BOOM
 
 $ python3 matrix.py "[3,7,3,9,3,2,2,0,2,1,4,10,4,11,11,12]"
