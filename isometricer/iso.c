@@ -48,11 +48,19 @@ bool isConnected(int *graph, int graphLen, int vertices) {
     return whitelistCount == vertices;
 }
 
+bool isTree(int *graph, int len, int vertices) {
+    // Can't have loops if it's minimally connected, also
+    // Trees are connected. And so yeah.
+    return len / 2 == vertices - 1 && isConnected(graph, len, vertices);
+}
+
 int main(int argc, char **argv) {
     int testGraph[] = {
         3, 7, 3, 9, 3, 2, 2, 0, 2, 1, 4, 10, 4, 11, 11, 12
     };
-    printf("Graph connected: %i\n", isConnected(testGraph, sizeof(testGraph) / sizeof(int), 10));
+    int len = sizeof(testGraph) / sizeof(int);
+    checkOverflow(testGraph, len);
+    printf("Graph connected: %i\n", isConnected(testGraph, len, 10));
     return 0;
 }
 
