@@ -109,7 +109,6 @@ def isConnected(g):
 
 
 
-
 print(checkIsometric([0, 1, 1, 2, 2, 3, 1, 7], [4, 3, 3, 6, 6, 1, 3, 9]))
 
 print(isConnected([0, 1, 2, 3, 1, 7]))
