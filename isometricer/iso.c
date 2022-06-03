@@ -7,12 +7,30 @@
 
 #define BUFFER_SIZE 512
 
-// tree is the flattened array with all of the pairs
-// of vertices that form the edges.
-// treeLen is the length of this array - NOT the number
-// of vertices or edges.
-// vertices is the number of unique vertices
+// Terminology here:
 //
+// graph/tree: the flattened array with all of the pairs
+// of vertices that form the edges.
+// So, the tree:
+// 1 - 2 - 3
+//     |
+//     4
+// Would have edges (1, 2), (2, 3), (2, 4)
+// And thus graph = {1, 2, 2, 3, 2, 4}
+// No particular order is required.
+// It follows that the length of this graph must always be divisiable
+// by two
+//
+// Graphs here must always have two or more vertices
+
+
+
+// graph: the graph array
+// graphLen: the length of graph array - NOT the number
+// of vertices or edges. Must be divisiable by 2.
+// vertices: the number of unique vertices. Thus MUST be
+// correct for the given graph.
+// Return: the specified graph is connected or not.
 bool isConnected(int *graph, int graphLen, int vertices) {
     bool whitelist[BUFFER_SIZE] = {false};
     int whitelistCount = 0;
@@ -51,15 +69,22 @@ bool isConnected(int *graph, int graphLen, int vertices) {
     return whitelistCount == vertices;
 }
 
+// graph: The graph array
+// len: Length of the graph array
+// vertices: Unique vertices in the graph 
+// Return: if the graph is a tree
 bool isTree(int *graph, int len, int vertices) {
     // Can't have loops if it's minimally connected, also
     // Trees are connected. And so yeah.
     return len / 2 == vertices - 1 && isConnected(graph, len, vertices);
 }
 
-// Output allocated size is assumed to be BUFFER_SIZE
-// Input assumed to be a tree
-// len must be divisable by two and > 0
+// tree: The graph array. Must be a tree
+// len: Length of the graph array
+// vertices: Unique vertices in the graph 
+// output: The code list (buffer). Assumed to be of size BUFFER_SIZE
+// outputLen: Length of the code list
+// Return: if the graph is a tree
 void treeCodeList(int *tree, int len, int vertices, int *output, int *outputLen) {
     typedef struct {
         int path;
@@ -97,6 +122,7 @@ void treeCodeList(int *tree, int len, int vertices, int *output, int *outputLen)
 
     assert(numVerts == vertices);
 
+    // How do you you like my *tail* recursion uwu
     for (int i = 0; i < vertices; i++) {
         int v = vertVals[i];
         if (map[v][0] == 1) {
@@ -130,6 +156,12 @@ void treeCodeList(int *tree, int len, int vertices, int *output, int *outputLen)
     }
 }
 
+// tree: The graph array. Must be a tree
+// len: Length of the graph array
+// vertices: Unique vertices in the graph 
+// error: pointer to variable to store errors. Can be NULL.
+//      - 1: Not enough primes are known to get this tree's code
+// Return: The unique isomorphic code for the tree type
 unsigned long treeCode(int *tree, int len, int vertices, int *error) {
     int codes[BUFFER_SIZE];
     int codesLen;
@@ -165,13 +197,17 @@ unsigned long treeCode(int *tree, int len, int vertices, int *error) {
     return result;
 }
 
+// Takes two trees and tests if they're isomorphic.
+// They MUST be trees.
 bool isIsometricTree(int *graphA, int lenA, int verticesA, int *graphB, int lenB, int verticesB) {
     return lenA == lenB && verticesA == verticesB &&
         treeCode(graphA, lenA, verticesA, NULL) == treeCode(graphB, lenB, verticesB, NULL);
 }
 
-// Output is a 2-d matrix of BUFFER_SIZE x BUFFER_SIZE
-// Vertices >= 2
+// vertices: tree class to test; test all trees with x vertices. vertices >= 2
+// output: a 2-d matrix of BUFFER_SIZE x BUFFER_SIZE, holding all the non-isomorphic trees.
+// outputLen: length of output.
+// seriesLenOutput: length of each tree array in output.
 void bruteTestVertices(int vertices, int *output, int *outputLen, int *seriesLenOutput) {
     // The current tested series
     int series[BUFFER_SIZE] = {0};
@@ -207,8 +243,12 @@ void bruteTestVertices(int vertices, int *output, int *outputLen, int *seriesLen
     }
 }
 
-// Func is a function like bruteTestVertices()
-// tests is assumed to be size of size endVertex - startVertex
+// func: a function like bruteTestVertices(), used to get non-isomorphic trees.
+// startVertex: vertex to start at
+// endVertex: vertex to end at
+// tests: assumed to be size of size endVertex - startVertex. Output for test results.
+// the test results are whether func really was able to find all the non-isomorphic graphs
+// for a given number of vertices
 void validateTests(void (*func)(int,int*,int*,int*), int startVertex, int endVertex, bool *tests) {
     // https://oeis.org/A000055
     // Index directly corresponds to vertex (start is vertex zero)
@@ -233,7 +273,8 @@ void validateTests(void (*func)(int,int*,int*,int*), int startVertex, int endVer
     answerable = answerable < endVertex ? answerable : endVertex;
 
     for (int i = startVertex; i < answerable; i++) {
-        bruteTestVertices(i, (int *) series, &seriesLen, &indvSeriesLen);
+        func(i, (int *) series, &seriesLen, &indvSeriesLen);
+        /*
         printf("seriesLen = %i\n", seriesLen);
         for (int i = 0; i < seriesLen; i++) {
             printf("[");
@@ -242,7 +283,8 @@ void validateTests(void (*func)(int,int*,int*,int*), int startVertex, int endVer
             }
             printf("]\n");
         }
-        tests[i] = seriesLen == answers[i];
+        */
+        tests[i - startVertex] = seriesLen == answers[i];
     }
 }
 
@@ -279,12 +321,12 @@ int main(int argc, char **argv) {
 
 
     const int start = 2;
-    const int end = 5;
+    const int end = 6;
     const int numResults = end - start;
     bool results[numResults];
     validateTests(bruteTestVertices, start, end, results);
     for (int i = start; i < end; i++) {
-        printf("i=%i -> %s\n", i, results[i] ? "PASS" : "FAIL");
+        printf("i=%i -> %s\n", i, results[i - start] ? "PASS" : "FAIL");
     }
     
     return 0;
