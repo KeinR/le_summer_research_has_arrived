@@ -7,6 +7,13 @@
 
 #define BUFFER_SIZE 512
 
+
+// TODO:
+// Memioization
+// Threading
+
+
+
 // Terminology here:
 //
 // graph/tree: the flattened array with all of the pairs
@@ -95,6 +102,7 @@ void treeCodeList(int *tree, int len, int vertices, int *output, int *outputLen)
     // The first index of each list is the length
     // (and everything is initialized to zero, so...)
     int map[BUFFER_SIZE][BUFFER_SIZE] = {0};
+    bool catchMap[BUFFER_SIZE][BUFFER_SIZE] = {false};
     int vertVals[BUFFER_SIZE];
     pathStruc path[BUFFER_SIZE];
     int pathLen = 0;
@@ -136,7 +144,18 @@ void treeCodeList(int *tree, int len, int vertices, int *output, int *outputLen)
                 int degree = map[newVert][0];
                 if (degree == 1 || (pathLen >= 2 && path[pathLen - 2].vertex == newVert)) {
                     if (pathLen < 2 || path[pathLen - 2].vertex != newVert) {
-                        output[(*outputLen)++] = pathLen;
+                        int min, max;
+                        if (v < newVert) {
+                            min = v;
+                            max = newVert;
+                        } else {
+                            min = newVert;
+                            max = v;
+                        }
+                        if (!catchMap[max][min]) {
+                            catchMap[max][min] = true;
+                            output[(*outputLen)++] = pathLen;
+                        }
                     }
                     // Increment the path
                     path[pathLen - 1].path++;
