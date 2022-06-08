@@ -1,6 +1,6 @@
 
 all: centrism.c
-	gcc centrism.c -o centrism
+	gcc -g centrism.c -o centrism
 
 run: all
 	./centrism

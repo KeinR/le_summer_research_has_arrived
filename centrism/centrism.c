@@ -3,74 +3,77 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <assert.h>
 
 #define BUFFER_SIZE 512
 
+// Must have more than one vertex
 void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
-    // Worst time complexity of O(len * 5/2)
-    // IE, this is O(n) in terms of the size of the tree
     
     typedef struct {
-        int value;
-        int index;
-    } leaf;
+        int ad[BUFFER_SIZE];
+        int adLen;
+        int connect;
+    } vertexInfo;
 
-    leaf leaves[BUFFER_SIZE];
+    vertexInfo vertexMap[BUFFER_SIZE] = {0};
+    // The last set of snapped off leaves
+    int leaves[BUFFER_SIZE];
     int leavesLen = 0;
-    int counterMap[BUFFER_SIZE] = {0};
-    // O(len)
+
+    // Special case, v=2 tree
+    if (len / 2 == 2) {
+        *outA = tree[0];
+        *outB = tree[1];
+        return;
+    } 
+
     for (int i = 0; i < len; i++) {
-        counterMap[tree[i]]++;
+        vertexMap[tree[i]].connect++;
+        // the other value in the pair
+        int oi = !(i % 2) + i - i % 2;
+        vertexMap[tree[i]].ad[vertexMap[tree[i]].adLen++] = tree[oi];
     }
-    // O(len)
+
     for (int i = 0; i < len; i++) {
         int v = tree[i];
-        if (counterMap[v] == 1) {
-            counterMap[v] = -1;
-            leaf l;
-            l.value = v;
-            l.index = i;
-            leaves[leavesLen++] = l;
+        if (vertexMap[v].connect == 1) {
+            vertexMap[v].connect = 0;
+            leaves[leavesLen++] = v;
         }
     }
 
-    bool running = true;
-    // O(vertices)
-    // vertices = len/2 
-    // O(len/2)
-    while (running) {
-        if (leavesLen == 2 && abs(leaves[0].index - leaves[1].index) == 1) {
-            // There are two leaves, and they are connected- meaning,
-            // there are two nodes in teh graph left. Thus, we have just two
-            // centers
-            *outA = leaves[0].value;
-            *outB = leaves[1].value;
-            running = false;
-        } else if (leavesLen == 1) {
-            // The only case where a tree can have one leaf is when it only
-            // has one vertex.
-            // Now that all the leaves have been removed, we have the center.
-            *outA = leaves[0].value;
-            *outB = -1;
-            running = false;
-        } else {
-            // Remove all the leaves.
-            // Replace old leaves with the new ones.
-            int newLeavesLen = 0;
-            for (int i = 0; i < leavesLen; i++) {
-                leaf l = leaves[i];
-                leaf nl;
-                // The other node in the 2-indexed value pair
-                nl.index = !(l.index % 2) + l.index - l.index % 2;
-                nl.value = tree[nl.index];
-                // Reduce the number of connections to vertex nl.value
-                counterMap[nl.value]--;
-                // When connections are equal to 1, then we have created a leaf
-                if (counterMap[nl.value] == 1) {
-                    leaves[newLeavesLen++] = nl;
+    bool run = true;
+    while (run) {
+        // Remove all the leaves.
+        // Replace old leaves with the new ones.
+        int newLeavesLen = 0;
+        for (int i = 0; i < leavesLen; i++) {
+            int l = leaves[i];
+            int nl = -1;
+            for (int a = 0; a < vertexMap[l].adLen && nl == -1; a++) {
+                int v = vertexMap[l].ad[a];
+                if (vertexMap[v].connect == 2) {
+                    vertexMap[v].connect = 0;
+                    nl = v;
+                } else {
+                    vertexMap[v].connect--;
                 }
             }
-            leavesLen = newLeavesLen;
+            if (nl != -1) {
+                leaves[newLeavesLen++] = nl;
+            }
+        }
+        leavesLen = newLeavesLen;
+        if (leavesLen == 0) {
+            *outA = leaves[0];
+            *outB = leaves[1];
+            run = false;
+        }
+        if (leavesLen == 1) {
+            *outA = leaves[0];
+            *outB = -1;
+            run = false;
         }
     }
 }
@@ -155,12 +158,21 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
 
 
 int main(int argc, char **argv) {
-    int data[] = {
-        0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6
-    };
+    // Line graph, 3
+    int data[] = {0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6};
+    // Binary tree, 1
+    int data2[] = {4,2,2,5,2,1,1,3,3,6,3,7};
+    // that one thing from wikipedia, 8,3,4
+    int dataG[] = {1,2,2,3,3,4,4,5,4,6,6,7,6,8,8,9,8,3};
     int output[BUFFER_SIZE] = {0};
-    treeJordanCenter(data, sizeof(data)/sizeof(int),  output+1, output+2);
+    int outLen = 0;
+    treeJordanCenter(data2, sizeof(data)/sizeof(int),  output+0, output+1);
     printf("%i and %i\n", output[0], output[1]);
+    graphJordanCenter(dataG, sizeof(data)/sizeof(int), output, &outLen);
+    for (int i = 0; i < outLen; i++) {
+        printf("%i,", output[i]);
+    }
+    printf("\n");
     return 0;
 }
 
