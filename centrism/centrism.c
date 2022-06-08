@@ -155,7 +155,12 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
 
 
 int main(int argc, char **argv) {
-
+    int data[] = {
+        0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6
+    };
+    int output[BUFFER_SIZE] = {0};
+    treeJordanCenter(data, sizeof(data)/sizeof(int),  output+1, output+2);
+    printf("%i and %i\n", output[0], output[1]);
     return 0;
 }
 
