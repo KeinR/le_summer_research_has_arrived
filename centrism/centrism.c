@@ -9,6 +9,7 @@
 
 // Must have more than one vertex
 void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
+    assert(len % 2 == 0);
     
     typedef struct {
         int ad[BUFFER_SIZE];
@@ -80,6 +81,8 @@ void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
 
 // Approximately O(n^2), which is, if nothing else, better than Floyd–Warshall
 void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
+    assert(len % 2 == 0);
+
     typedef struct {
         int data[BUFFER_SIZE];
         int len;
@@ -97,7 +100,7 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
     // Uncecessary, does nothing, but still good practice I think.
     *outputLen = 0;
 
-    // O(edges)
+    vertices.len = 0;
     for (int i = 0; i < len/2; i++) {
         // Could compress this by using modulo
         // to get the other one
@@ -111,7 +114,7 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
             vertices.data[vertices.len++] = a;
         }
         if (bv->len == 1) {
-            vertices.data[vertices.len++] = a;
+            vertices.data[vertices.len++] = b;
         }
     }
 
@@ -123,6 +126,7 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
         int ib = 1;
         vertexBuffers[ab].data[0] = v;
         vertexBuffers[ab].len = 1;
+        vertexBuffers[ib].len = 0;
 
         // Can get rid of this entirely if we convert
         // getMap to an integer map and give each loop
@@ -168,7 +172,7 @@ int main(int argc, char **argv) {
     int outLen = 0;
     treeJordanCenter(data2, sizeof(data)/sizeof(int),  output+0, output+1);
     printf("%i and %i\n", output[0], output[1]);
-    graphJordanCenter(dataG, sizeof(data)/sizeof(int), output, &outLen);
+    graphJordanCenter(dataG, sizeof(dataG)/sizeof(int), output, &outLen);
     for (int i = 0; i < outLen; i++) {
         printf("%i,", output[i]);
     }
