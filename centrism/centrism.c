@@ -8,6 +8,7 @@
 #define BUFFER_SIZE 512
 
 // Must have more than one vertex
+// O(n) (!!!)
 void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
     assert(len % 2 == 0);
     
@@ -118,7 +119,12 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
         }
     }
 
-    // O(vertices^2)
+    // O(n^2)
+    // For eacch vertex, iterates over every edge adjacent to every node.
+    // So, those total edges = 2 * edges
+    // v = vertices
+    // k = edges
+    // O(2kv)
     for (int i = 0; i < vertices.len; i++) {
         int v = vertices.data[i];
         int score = 0;
