@@ -9,6 +9,9 @@
 
 // Must have more than one vertex
 // O(n) (!!!)
+// Works by removing leaves until left with one or two vertices.
+// I posit that these would be the Jordan centers.
+// 
 void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
     assert(len % 2 == 0);
     
@@ -18,6 +21,7 @@ void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
         int connect;
     } vertexInfo;
 
+    // Mappings from vertex labels to metainformation
     vertexInfo vertexMap[BUFFER_SIZE] = {0};
     // The last set of snapped off leaves
     int leaves[BUFFER_SIZE];
@@ -30,6 +34,7 @@ void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
         return;
     } 
 
+    // Build vertex map
     for (int i = 0; i < len; i++) {
         vertexMap[tree[i]].connect++;
         // the other value in the pair
@@ -37,6 +42,7 @@ void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
         vertexMap[tree[i]].ad[vertexMap[tree[i]].adLen++] = tree[oi];
     }
 
+    // Initialize leaves
     for (int i = 0; i < len; i++) {
         int v = tree[i];
         if (vertexMap[v].connect == 1) {
@@ -53,6 +59,14 @@ void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
         for (int i = 0; i < leavesLen; i++) {
             int l = leaves[i];
             int nl = -1;
+            // Iterate through the adjacency list for this leaf, find the node
+            // that it is connected to just barely. If this leaf is the only
+            // one connecting to it, then we append it to the leaves array
+            // (we're overwriting the leaves array, but we're iterating ahead
+            // of the writes, so there is no issue).
+            // Otherwise, decrement the number of nodes that that node is connected to.
+            // At some point, there will be a leaf that it is soley connected to through,
+            // along with, of coruse, one other node deeper in the tree
             for (int a = 0; a < vertexMap[l].adLen && nl == -1; a++) {
                 int v = vertexMap[l].ad[a];
                 if (vertexMap[v].connect == 2) {
@@ -67,11 +81,16 @@ void treeJordanCenter(int *tree, int len, int *outA, int *outB) {
             }
         }
         leavesLen = newLeavesLen;
+        // No new leaves were made, means that there were no
+        // nodes with a degree of two remaining - meaning one thing:
+        // that there two, connected nodes remaining.
+        // Salavage these from the leaf array
         if (leavesLen == 0) {
             *outA = leaves[0];
             *outB = leaves[1];
             run = false;
         }
+        // There's only one leaf. This is only possible if there is only one node
         if (leavesLen == 1) {
             *outA = leaves[0];
             *outB = -1;
@@ -95,12 +114,16 @@ void graphJordanCenter(int *graph, int len, int *output, int *outputLen) {
     bufferType vertices;
     // Alternating vertex buffers
     bufferType vertexBuffers[2];
+    // Vertices that have been selected
     bool getMap[BUFFER_SIZE] = {0};
     
+    // The current smallest max distance found for any give node.
     int bestScore = INT_MAX;
     // Uncecessary, does nothing, but still good practice I think.
     *outputLen = 0;
 
+    // Find all the unique vertices,
+    // as well as initialize the vertex map
     vertices.len = 0;
     for (int i = 0; i < len/2; i++) {
         // Could compress this by using modulo

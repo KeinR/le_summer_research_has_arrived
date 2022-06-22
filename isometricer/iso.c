@@ -182,6 +182,7 @@ void treeCodeList(int *tree, int len, int vertices, int *output, int *outputLen)
     //
     // Since the leaf is only connected to one element, we are looping until all those connected to the beginning path
     // element have been explored. When that has happened, path[0].path will drop below 1.
+
     for (int i = 0; i < vertices; i++) {
         int v = vertVals[i];
         if (map[v][0] == 1) {
