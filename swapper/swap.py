@@ -18,6 +18,7 @@ output = open('reports/%s.csv' % (name), 'w')
 outputSummary = open('reports/%s.txt' % (name), 'w')
 data = json.load(file)
 counterSwp = {}
+counterSwpLabel = {}
 counterRes = {}
 
 graph = json.loads(graphStr)
@@ -53,16 +54,16 @@ for labelling in data:
             gainedA.sort()
             lost = set(lostA)
             gained = set(gainedA)
-
-            # swp = copy.deepcopy(labelling)
-            # tmp = swp[a]
-            # swp[a] = swp[b]
-            # swp[b] = tmp
-
+            
             p = "FAIL"
 
             #if swp in data:
             if lost == gained:
+                swp = copy.deepcopy(labelling)
+                tmp = swp[a]
+                swp[a] = swp[b]
+                swp[b] = tmp
+
                 p = "PASS"
                 passed += 1
                 l = 0
@@ -77,6 +78,19 @@ for labelling in data:
                 if not f in counterSwp:
                     counterSwp[f] = 0
                 counterSwp[f] += 1
+                l = 0
+                h = 0
+                if av > bv:
+                    h = av
+                    l = bv
+                else:
+                    h = bv
+                    l = av
+                f = "(%i,%i)" % (l,h)
+                if not f in counterSwp:
+                    counterSwpLabel[f] = 0
+                counterSwpLabel[f] += 1
+
                 ss = str(swp)
                 if not ss in counterRes:
                     counterRes[ss] = 0
@@ -101,7 +115,9 @@ outputSummary.write("Graph: %s\n" % (graph))
 outputSummary.write("----------------------------\n")
 outputSummary.write("Passed (swapped): %i\n" % (passed))
 outputSummary.write("----------------------------\n")
-outputSummary.write("Swapped pair frequencies: %s\n" % (str(counterSwp)))
+outputSummary.write("Swapped pair frequencies (indices): %s\n" % (str(counterSwp)))
+outputSummary.write("----------------------------\n")
+outputSummary.write("Swapped pair frequencies (labels): %s\n" % (str(counterSwpLabel)))
 outputSummary.write("----------------------------\n")
 outputSummary.write("Resultant tree instances: %s\n" % (str(counterRes)))
 outputSummary.write("----------------------------\n")
